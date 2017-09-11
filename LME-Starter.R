@@ -1,5 +1,4 @@
 library(nlme)
-library(MASS)
 
 # This basic R script prepares data for predictions,
 # runs a basic LME and then writes the predictions to a .csv
@@ -10,7 +9,7 @@ setwd("/home/anerdi/Desktop/Zillow")
 ### load data
 properties <- read.csv('./data/properties_2016.csv/properties_2016.csv')
 logerror <- read.csv('./data/train_2016_v2.csv/train_2016_v2.csv')
-traindata <- merge(properties, logerror, by="parcelid")
+data <- merge(properties, logerror, by="parcelid")
 
 # numerical variables
 num_atts = c('bathroomcnt','bedroomcnt','buildingqualitytypeid','calculatedbathnbr','finishedfloor1squarefeet',

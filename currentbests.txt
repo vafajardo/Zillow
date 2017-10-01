@@ -1,0 +1,50 @@
+################################################################################
+ Current Best StandAlones
+################################################################################
+Linear Models
+stage1_stacked_annrfsxgbslgmbs_stage2_ridge score = 0.0645347
+stage1_stacked_annrfsxgbs_stage2_enet score = 0.0645458
+stage1_stacked_annrfsxgbs_stage2_lasso score = 0.0645460
+stage1_stacked_annrfsxgbs_stage2_lme score = 0.0646430
+
+Random Forests
+stage1_stacked_annrfsxgbs_stage2_maxdepth8_age score = 0.0646285
+
+################################################################################
+Current Best Super Learner:
+################################################################################
+
+Public Lederboard Score:  0.0644902
+
+Training Data Scores:
+(0.061480513550054926, 0.06060169998654701,
+0.07312622943786729, 0.063663513592426765,
+0.06643720246177268)
+
+Base learners:
+
+stacked_annrfsxgbs_ridge
+stacked_annrfsxgbs_enet
+stacked_annrfsxgbs_lasso
+logistic_enet
+stacked_annrfsxgbs_rf_maxdepth8
+
+
+weights file:
+
+/home/anerdi/Desktop/Zillow/levelonedata/super_learner_weights_12.csv.gz"
+
+preds file :
+
+/home/anerdi/Desktop/Zillow/levelonedata/super_learner_preds.csv.gz"
+
+################################################################################
+ Current Best Ensemble
+################################################################################
+
+score = 0.0644823
+
+models = [(stacked_final,0.80),
+    (annrfsxgbs_LME, 0.12),(annrfs_LME,0.03),
+    (XGB3000, 0.03),
+    (RF_2, 0.02)]

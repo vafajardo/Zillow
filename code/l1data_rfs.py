@@ -28,105 +28,45 @@ logerror['weeknumber'] = logerror['transactiondate'].apply(lambda x: datetime.da
 logerror['month'] = logerror['transactiondate'].apply(lambda x: datetime.datetime.strptime(x,'%Y-%m-%d').month)
 properties = pd.read_csv(maindir + "/data/properties_2016.csv/properties_2016.csv")
 
-#life of property
-properties['N-life'] = 2018 - properties['yearbuilt']
-
-#error in calculation of the finished living area of home
-properties['N-LivingAreaError'] = properties['calculatedfinishedsquarefeet']/properties['finishedsquarefeet12']
-
 #proportion of living area
 properties['N-LivingAreaProp'] = properties['calculatedfinishedsquarefeet']/properties['lotsizesquarefeet']
-properties['N-LivingAreaProp2'] = properties['finishedsquarefeet12']/properties['finishedsquarefeet15']
 
-#Amout of extra space
-properties['N-ExtraSpace'] = properties['lotsizesquarefeet'] - properties['calculatedfinishedsquarefeet']
-properties['N-ExtraSpace-2'] = properties['finishedsquarefeet15'] - properties['finishedsquarefeet12']
-
-#Total number of rooms
-properties['N-TotalRooms'] = properties['bathroomcnt']*properties['bedroomcnt']
-
-#Average room size
-properties['N-AvRoomSize'] = properties['calculatedfinishedsquarefeet']/properties['roomcnt']
-
-# Number of Extra rooms
-properties['N-ExtraRooms'] = properties['roomcnt'] - properties['N-TotalRooms']
+properties['N-NonLivingAreaProp'] = properties['garagetotalsqft']/properties['lotsizesquarefeet']
 
 #Ratio of the built structure value to land area
 properties['N-ValueProp'] = properties['structuretaxvaluedollarcnt']/properties['landtaxvaluedollarcnt']
 
-#Does property have a garage, pool or hot tub and AC?
-properties['N-GarPoolAC'] = ((properties['garagecarcnt']>0) & (properties['pooltypeid10']>0) & (properties['airconditioningtypeid']!=5))*1
-
-properties["N-location"] = properties["latitude"] + properties["longitude"]
-properties["N-location-2"] = properties["latitude"]*properties["longitude"]
-properties["N-location-2round"] = properties["N-location-2"].round(-4)
-
-properties["N-latitude-round"] = properties["latitude"].round(-4)
-properties["N-longitude-round"] = properties["longitude"].round(-4)
-
 #Ratio of tax of property over parcel
 properties['N-ValueRatio'] = properties['taxvaluedollarcnt']/properties['taxamount']
 
-#TotalTaxScore
-properties['N-TaxScore'] = properties['taxvaluedollarcnt']*properties['taxamount']
+# Pool
+properties['poolsizesum'] = properties['poolsizesum'].fillna(0)
+# properties['Pool'] = (properties['poolsizesum'] > 0).astype(int)
+properties['Pool'] = (properties['pooltypeid2'].fillna(0) + properties['pooltypeid7'].fillna(0)).astype(int)
 
-#polnomials of tax delinquency year
-properties["N-taxdelinquencyyear-2"] = properties["taxdelinquencyyear"] ** 2
-properties["N-taxdelinquencyyear-3"] = properties["taxdelinquencyyear"] ** 3
+properties['regionidcounty'] = properties['regionidcounty'].fillna(9999)
 
-#Length of time since unpaid taxes
-properties['N-life'] = 2018 - properties['taxdelinquencyyear']
-
-#Number of properties in the zip
-zip_count = properties['regionidzip'].value_counts().to_dict()
-properties['N-zip_count'] = properties['regionidzip'].map(zip_count)
-
-#Number of properties in the city
-city_count = properties['regionidcity'].value_counts().to_dict()
-properties['N-city_count'] = properties['regionidcity'].map(city_count)
-
-#Number of properties in the city
-region_count = properties['regionidcounty'].value_counts().to_dict()
-properties['N-county_count'] = properties['regionidcounty'].map(region_count)
-
-#Average structuretaxvaluedollarcnt by city
-group = properties.groupby('regionidcity')['structuretaxvaluedollarcnt'].aggregate('mean').to_dict()
-properties['N-Avg-structuretaxvaluedollarcnt'] = properties['regionidcity'].map(group)
-
-#Deviation away from average
-properties['N-Dev-structuretaxvaluedollarcnt'] = (abs((properties['structuretaxvaluedollarcnt']
-                                                       - properties['N-Avg-structuretaxvaluedollarcnt']))
-                                                  /properties['N-Avg-structuretaxvaluedollarcnt'])
-
-
-# join on parcel id
-data = pd.merge(properties,logerror[['parcelid','logerror','month']], on='parcelid')
-data['wts_oct'] = np.where(data['month'] == 10, 1.5, 1)
-data['wts_nov'] = np.where(data['month'] == 11, 1.5, 1)
-data['wts_dec'] = np.where(data['month'] == 12, 1.5, 1)
+# some more feature engineering
+properties['age'] = 2017 - properties['yearbuilt']
+properties['additional_rooms_count'] = np.maximum((properties['roomcnt'].values
+                                                   - properties['calculatedbathnbr'].values
+                                                   - properties['bedroomcnt'].values),0)
 
 
 # ### Feature Pipeline
 # Setup variables considered in the model
 
 # numerical variables
-num_atts = ['bathroomcnt','bedroomcnt','buildingqualitytypeid','calculatedbathnbr','finishedfloor1squarefeet',
-           'calculatedfinishedsquarefeet','finishedsquarefeet12','finishedsquarefeet13',
-           'finishedsquarefeet15','finishedsquarefeet50','finishedsquarefeet6','fireplacecnt',
-           'fullbathcnt','garagecarcnt','garagetotalsqft','latitude','longitude','lotsizesquarefeet',
-           'poolcnt','poolsizesum','censustractandblock','roomcnt','threequarterbathnbr','unitcnt',
-           'yardbuildingsqft17','yardbuildingsqft26','numberofstories',
-            'structuretaxvaluedollarcnt','taxvaluedollarcnt','landtaxvaluedollarcnt','taxamount',
-           'N-ValueRatio', 'N-LivingAreaProp', 'N-ValueProp', 'N-Dev-structuretaxvaluedollarcnt',
-            'N-TaxScore', 'N-zip_count', 'N-Avg-structuretaxvaluedollarcnt', 'N-city_count',
-           'N-LivingAreaProp2', 'N-location-2round', 'N-TotalRooms','N-AvRoomSize']
+num_atts = ['bedroomcnt','calculatedbathnbr','age','additional_rooms_count',
+           'calculatedfinishedsquarefeet','fullbathcnt','garagecarcnt','garagetotalsqft',
+            'latitude','longitude','lotsizesquarefeet', 'roomcnt',
+           'numberofstories','structuretaxvaluedollarcnt','taxvaluedollarcnt','landtaxvaluedollarcnt','taxamount',
+           'N-ValueRatio', 'N-LivingAreaProp', 'N-NonLivingAreaProp','N-ValueProp']
 
 # categorical varaibles
 cat_atts = ['airconditioningtypeid','architecturalstyletypeid',
-           'buildingclasstypeid','heatingorsystemtypeid','pooltypeid10','pooltypeid2',
-            'pooltypeid7','propertylandusetypeid','regionidcounty',
-           'storytypeid','typeconstructiontypeid','yearbuilt','fireplaceflag',
-           'taxdelinquencyflag']
+           'buildingclasstypeid','heatingorsystemtypeid','Pool','propertylandusetypeid','regionidcounty',
+           'storytypeid','typeconstructiontypeid','fireplaceflag','taxdelinquencyflag']
 
 # Dictionary of categorical variables and their default levels
 cat_dict = {'airconditioningtypeid':[-1] + list(range(1,14)),
@@ -139,13 +79,13 @@ cat_dict = {'airconditioningtypeid':[-1] + list(range(1,14)),
             'propertylandusetypeid': [-1, 31,46,47,246,247,248,260,261,262,263,264,265,266,267,268,269,270,271,
                                      273,274,275,276,279,290,291],
             'regionidcounty': [2061,3101,1286],
+            'month': [-1] + list(range(1,13)),
             'storytypeid':[-1] + list(range(1,36)),
             'typeconstructiontypeid':[-1] + list(range(1,19)),
             'yearbuilt': [-1] + list(range(1885,2018)),
             'fireplaceflag': [-1] + ['True','False'],
             'taxdelinquencyflag': [-1] + ['Y','N']
            }
-
 
 # Categorical pipeline
 cat_pipeline = Pipeline([
@@ -163,6 +103,30 @@ feature_pipeline = FeatureUnion(transformer_list=[
         ("num_pipeline", num_pipeline),
         ("cat_pipeline", cat_pipeline)
     ])
+
+# impute missing num_atts per regionid
+for countyid in properties.regionidcounty.unique():
+    # setup condition
+    cond = properties['regionidcounty'] == countyid
+    indices = np.where(cond)[0]
+    # impute values based on region
+    if countyid != 9999:
+        properties.loc[indices,num_atts] = (properties.loc[indices,num_atts]
+                                .fillna(properties.loc[indices,num_atts]
+                                .apply(np.mean)))
+    else:
+        properties.loc[indices,num_atts] = (properties.loc[indices,num_atts]
+                                            .fillna(properties[num_atts]
+                                            .apply(np.mean)))
+
+assert properties[num_atts].isnull().any().any() == False
+
+# join on parcel id
+data = pd.merge(properties,logerror[['parcelid','logerror','month']], on='parcelid')
+data['wts_rf_10'] = np.where(data['month'] == 10, 1.5, 1)
+data['wts_rf_11'] = np.where(data['month'] == 11, 1.5, 1)
+data['wts_rf_12'] = np.where(data['month'] == 12, 1.5, 1)
+
 
 # ### Splitting data into the K-Folds
 indices = np.arange(data.shape[0])
@@ -182,18 +146,24 @@ stacked_annrfs_probabilities = pd.read_csv("/home/anerdi/Desktop/Zillow/twostage
 stacked_annrfs_probabilities.rename(columns={'stacked_pred':"overestimate_prob"}, inplace=True)
 stacked_annrfs_probabilities = pd.merge(data[['parcelid']], stacked_annrfs_probabilities, on='parcelid')
 
+stacked_annrfsxgbs_probabilities = pd.read_csv("/home/anerdi/Desktop/Zillow/twostagemodel/overestimate_probs_stacked_ann_rfs_xgbs.csv.gz")
+stacked_annrfsxgbs_probabilities.rename(columns={'stacked_pred':"overestimate_prob"}, inplace=True)
+stacked_annrfsxgbs_probabilities = pd.merge(data[['parcelid']], stacked_annrfsxgbs_probabilities, on='parcelid')
+
 logistic_probabiliies = pd.read_csv("/home/anerdi/Desktop/Zillow/twostagemodel/overestimate_probs.csv.gz")
 logistic_probabiliies = pd.merge(data[['parcelid']], logistic_probabiliies, on='parcelid')
 
 assert (stacked_rfs_probabilities.parcelid == data.parcelid).all()
 assert (stacked_annrfs_probabilities.parcelid == data.parcelid).all()
+assert (stacked_annrfsxgbs_probabilities.parcelid == data.parcelid).all()
 assert (logistic_probabiliies.parcelid == data.parcelid).all()
 
 
 stage1_models = [
-    ('stacked_rfs', stacked_rfs_probabilities),
-    ('stacked_annrfs', stacked_annrfs_probabilities),
-    ('logistic', logistic_probabiliies)
+    # ('stacked_rfs', stacked_rfs_probabilities),
+    # ('stacked_annrfs', stacked_annrfs_probabilities),
+    ('stacked_annrfsxgbs', stacked_annrfs_probabilities),
+    # ('logistic', logistic_probabiliies)
 ]
 
 
@@ -201,10 +171,9 @@ stage1_models = [
 feature_pipeline.fit(properties) #fitting the pipeline to the entire properties dataframe
 
 stage2_models = [
-    ("rf",RandomForestRegressor(n_estimators = 100, max_features = 5,
-                                    random_state=9, max_depth=9, criterion='mse')),
-    ("rf_overfit", RandomForestRegressor(n_estimators = 100, max_features = 5,
-                                      random_state=9, max_depth=25, criterion='mse')),
+    ("rf_maxdepth8",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=8, criterion='mse')),
+    ("rf_maxdepth10",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=10, criterion='mse')),
+    ("rf_maxdepth12",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=12, criterion='mse')),
 ]
 
 # split training data into over/under subsets
@@ -225,7 +194,7 @@ for stage1_pair in stage1_models:
         # initialize an NoneObject to be a placeholder for level-one data for current model
         model_preds = None
         print("...working on fold 1")
-        for fold_nbr in range(nfolds,nfolds+1):
+        for fold_nbr in range(1,nfolds+1):
             if (fold_nbr+1) % 10 == 0:
                 print("...working on fold %d" % fold_nbr)
 
@@ -275,5 +244,5 @@ for stage1_pair in stage1_models:
 print("all done!")
 
 # writing level one data to file
-level_one_data.to_csv("/home/anerdi/Desktop/Zillow/levelonedata/l1data_twostage_rfs_last_fold.csv.gz", index=False,
+level_one_data.to_csv("/home/anerdi/Desktop/Zillow/levelonedata/l1data_twostage_rfs_age_stage1xgbsonly.csv.gz", index=False,
                      compression='gzip')

@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder, I
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.ensemble import RandomForestRegressor
+from lightgbm import LGBMRegressor
 
 import feature_pipelines as pipes
 
@@ -174,6 +175,7 @@ stage2_models = [
     ("rf_maxdepth8",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=8, criterion='mse')),
     ("rf_maxdepth10",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=10, criterion='mse')),
     ("rf_maxdepth12",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=12, criterion='mse')),
+    ("lgb", LGBMRegressor(n_estimators=1, random_state=9))
 ]
 
 # split training data into over/under subsets

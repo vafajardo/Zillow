@@ -2,13 +2,17 @@
  Current Best StandAlones
 ################################################################################
 Linear Models
-stage1_stacked_annrfsxgbslgmbs_stage2_ridge score = 0.0645347
+stage1_stacked_annrfsxgbs_stage2_ridge (with extreme over estimation detection) score = 0.0645221
 stage1_stacked_annrfsxgbs_stage2_enet score = 0.0645458
 stage1_stacked_annrfsxgbs_stage2_lasso score = 0.0645460
 stage1_stacked_annrfsxgbs_stage2_lme score = 0.0646430
 
 Random Forests
 stage1_stacked_annrfsxgbs_stage2_maxdepth8_age score = 0.0646285
+
+LightGBM
+stage1_stacked_annrfsxgbs_stage2_lgbm_age score = 0.0646955
+
 
 ################################################################################
 Current Best Super Learner:
@@ -42,9 +46,16 @@ preds file :
  Current Best Ensemble
 ################################################################################
 
-score = 0.0644823
+score = 0.0644822
+score = 0.0644601 (with extreme points perturbation)
 
 models = [(stacked_final,0.80),
-    (annrfsxgbs_LME, 0.12),(annrfs_LME,0.03),
+    (annrfsxgbs_LME, 0.09),(annrfs_LME,0.06),
     (XGB3000, 0.03),
-    (RF_2, 0.02)]
+    (LGBM, 0.02)]
+
+  (0.06147379947759706,
+   0.06059189485213572,
+   0.0731354226566993,
+   0.063659377195036351,
+   0.06643143505954292)

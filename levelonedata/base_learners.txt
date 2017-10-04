@@ -1,7 +1,2 @@
-stacked_annrfsxgbs_ridge
-stacked_annrfsxgbs_enet
-stacked_annrfsxgbs_lasso
-logistic_enet
-logistic_ridge
-stacked_annrfsxgbs_rf_maxdepth8
-stacked_annrfsxgbs_lgb
+stacked_annrfsxgbslgbms201617_ridge
+catboost

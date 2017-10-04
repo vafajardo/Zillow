@@ -177,6 +177,10 @@ stacked_annrfsxgbs_probabilities = pd.read_csv("/home/anerdi/Desktop/Zillow/twos
 stacked_annrfsxgbs_probabilities.rename(columns={'stacked_pred':"overestimate_prob"}, inplace=True)
 stacked_annrfsxgbs_probabilities = pd.merge(data[['parcelid']], stacked_annrfsxgbs_probabilities, on='parcelid')
 
+stacked_annrfsxgbslgbms201617_probabilities = pd.read_csv("/home/anerdi/Desktop/Zillow/twostagemodel/overestimate_probs_stacked_ann_rfs_xgbs_lgbms_20162017.csv.gz")
+stacked_annrfsxgbslgbms201617_probabilities.rename(columns={'stacked_pred':"overestimate_prob"}, inplace=True)
+stacked_annrfsxgbslgbms201617_probabilities = pd.merge(data[['parcelid']], stacked_annrfsxgbslgbms201617_probabilities, on='parcelid')
+
 logistic_probabiliies = pd.read_csv("/home/anerdi/Desktop/Zillow/twostagemodel/overestimate_probs.csv.gz")
 logistic_probabiliies = pd.merge(data[['parcelid']], logistic_probabiliies, on='parcelid')
 
@@ -184,13 +188,15 @@ assert (stacked_rfs_probabilities.parcelid == data.parcelid).all()
 assert (stacked_annrfs_probabilities.parcelid == data.parcelid).all()
 assert (stacked_annrfsxgbs_probabilities.parcelid == data.parcelid).all()
 assert (logistic_probabiliies.parcelid == data.parcelid).all()
+assert (stacked_annrfsxgbslgbms201617_probabilities.parcelid == data.parcelid).all()
 
 
 stage1_models = [
     # ('stacked_rfs', stacked_rfs_probabilities),
     # ('stacked_annrfs', stacked_annrfs_probabilities),
-    ('stacked_annrfsxgbs', stacked_annrfs_probabilities),
-    # ('logistic', logistic_probabiliies)
+    # ('stacked_annrfsxgbs', stacked_annrfs_probabilities),
+    ('stacked_annrfsxgbslgbms201617', stacked_annrfsxgbslgbms201617_probabilities),
+    ('logistic', logistic_probabiliies)
 ]
 
 
@@ -275,5 +281,5 @@ for stage1_pair in stage1_models:
 print("all done!")
 
 # writing level one data to file
-level_one_data.to_csv("/home/anerdi/Desktop/Zillow/levelonedata/l1data_twostage_linear_models_age_stage1xgbsonly.csv.gz", index=False,
+level_one_data.to_csv("/home/anerdi/Desktop/Zillow/levelonedata/l1data_twostage_linear_models_201617.csv.gz", index=False,
                      compression='gzip')

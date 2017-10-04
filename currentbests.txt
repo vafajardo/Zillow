@@ -2,36 +2,40 @@
  Current Best StandAlones
 ################################################################################
 Linear Models
-stage1_stacked_annrfsxgbs_stage2_ridge (with extreme over estimation detection) score = 0.0645221
+stage1_stacked_annrfsxgbslgbms_stage2_ridge score = 0.0644401
 stage1_stacked_annrfsxgbs_stage2_enet score = 0.0645458
 stage1_stacked_annrfsxgbs_stage2_lasso score = 0.0645460
 stage1_stacked_annrfsxgbs_stage2_lme score = 0.0646430
+stage1_stacked_annrfsxgbslgbms_stage2_larm score = 0.0646182
 
 Random Forests
-stage1_stacked_annrfsxgbs_stage2_maxdepth8_age score = 0.0646285
+stage1_stacked_annrfsxgbslgbms_stage2_maxdepth8_age score = 0.0645268
 
 LightGBM
 stage1_stacked_annrfsxgbs_stage2_lgbm_age score = 0.0646955
 
+CatBoost (One-Stage model)
+score = 0.0642193
+
+(0.06169011452682333,
+ 0.06021391018619933,
+ 0.07284450833812528,
+ 0.063645387497073228)
 
 ################################################################################
 Current Best Super Learner:
 ################################################################################
 
-Public Lederboard Score:  0.0644902
+Public Lederboard Score:  0.0644389
 
 Training Data Scores:
-(0.061480513550054926, 0.06060169998654701,
-0.07312622943786729, 0.063663513592426765,
-0.06643720246177268)
+(0.061758788717220875, 0.06075308565848641, 0.07331058919468288, 0.063895544423736586, 0.06664272933027128)
 
 Base learners:
 
-stacked_annrfsxgbs_ridge
-stacked_annrfsxgbs_enet
-stacked_annrfsxgbs_lasso
-logistic_enet
-stacked_annrfsxgbs_rf_maxdepth8
+stacked_annrfsxgbslgbms201617_ridge
+stacked_annrfsxgbslgbms201617_enet
+stacked_annrfsxgbslgbms201617_lasso
 
 
 weights file:
@@ -46,16 +50,22 @@ preds file :
  Current Best Ensemble
 ################################################################################
 
-score = 0.0644822
-score = 0.0644601 (with extreme points perturbation)
+score = 0.0642097
 
-models = [(stacked_final,0.80),
-    (annrfsxgbs_LME, 0.09),(annrfs_LME,0.06),
+models = [(catboost,0.85),
+    (stacked_final, 0.10),
     (XGB3000, 0.03),
     (LGBM, 0.02)]
 
-  (0.06147379947759706,
-   0.06059189485213572,
-   0.0731354226566993,
-   0.063659377195036351,
-   0.06643143505954292)
+(0.06160329515772539,
+ 0.06019895947426064,
+ 0.07284169062679703,
+ 0.063591032545071327,
+ 0.06657945832179722)
+
+ score = 0.0642964 (with extreme points perturbation)
+
+ (0.06143381555153723,
+ 0.06013811610076664,
+ 0.07279424956871768,
+ 0.063469620697728948)

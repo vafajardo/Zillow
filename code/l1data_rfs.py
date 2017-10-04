@@ -151,6 +151,10 @@ stacked_annrfsxgbs_probabilities = pd.read_csv("/home/anerdi/Desktop/Zillow/twos
 stacked_annrfsxgbs_probabilities.rename(columns={'stacked_pred':"overestimate_prob"}, inplace=True)
 stacked_annrfsxgbs_probabilities = pd.merge(data[['parcelid']], stacked_annrfsxgbs_probabilities, on='parcelid')
 
+stacked_annrfsxgbslgbms201617_probabilities = pd.read_csv("/home/anerdi/Desktop/Zillow/twostagemodel/overestimate_probs_stacked_ann_rfs_xgbs_lgbms_20162017.csv.gz")
+stacked_annrfsxgbslgbms201617_probabilities.rename(columns={'stacked_pred':"overestimate_prob"}, inplace=True)
+stacked_annrfsxgbslgbms201617_probabilities = pd.merge(data[['parcelid']], stacked_annrfsxgbslgbms201617_probabilities, on='parcelid')
+
 logistic_probabiliies = pd.read_csv("/home/anerdi/Desktop/Zillow/twostagemodel/overestimate_probs.csv.gz")
 logistic_probabiliies = pd.merge(data[['parcelid']], logistic_probabiliies, on='parcelid')
 
@@ -158,12 +162,13 @@ assert (stacked_rfs_probabilities.parcelid == data.parcelid).all()
 assert (stacked_annrfs_probabilities.parcelid == data.parcelid).all()
 assert (stacked_annrfsxgbs_probabilities.parcelid == data.parcelid).all()
 assert (logistic_probabiliies.parcelid == data.parcelid).all()
-
+assert (stacked_annrfsxgbslgbms201617_probabilities.parcelid == data.parcelid).all()
 
 stage1_models = [
     # ('stacked_rfs', stacked_rfs_probabilities),
     # ('stacked_annrfs', stacked_annrfs_probabilities),
     ('stacked_annrfsxgbs', stacked_annrfs_probabilities),
+    ('stacked_annrfsxgbslgbms201617', stacked_annrfsxgbslgbms201617_probabilities)
     # ('logistic', logistic_probabiliies)
 ]
 
@@ -173,8 +178,8 @@ feature_pipeline.fit(properties) #fitting the pipeline to the entire properties 
 
 stage2_models = [
     ("rf_maxdepth8",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=8, criterion='mse')),
-    ("rf_maxdepth10",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=10, criterion='mse')),
-    ("rf_maxdepth12",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=12, criterion='mse')),
+    # ("rf_maxdepth10",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=10, criterion='mse')),
+    # ("rf_maxdepth12",RandomForestRegressor(n_estimators = 100, max_features= 3, random_state=9, max_depth=12, criterion='mse')),
     ("lgb", LGBMRegressor(n_estimators=1, random_state=9))
 ]
 
@@ -246,5 +251,5 @@ for stage1_pair in stage1_models:
 print("all done!")
 
 # writing level one data to file
-level_one_data.to_csv("/home/anerdi/Desktop/Zillow/levelonedata/l1data_twostage_rfs_age_stage1xgbsonly.csv.gz", index=False,
+level_one_data.to_csv("/home/anerdi/Desktop/Zillow/levelonedata/l1data_twostage_rfs_201617.csv.gz", index=False,
                      compression='gzip')
